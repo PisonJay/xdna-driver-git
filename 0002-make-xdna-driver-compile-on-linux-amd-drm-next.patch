@@ -1,0 +1,25 @@
+From a39c8bbfd416a928e1e646f7fdedaef4b5074d39 Mon Sep 17 00:00:00 2001
+From: Pison Jay <PisonJay@outlook.com>
+Date: Sat, 14 Sep 2024 13:41:50 +0800
+Subject: [PATCH 2/2] make xdna driver compile on linux-amd-drm-next
+
+---
+ src/driver/amdxdna/aie2_ctx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/driver/amdxdna/aie2_ctx.c b/src/driver/amdxdna/aie2_ctx.c
+index 3343aea..6c58f5a 100644
+--- a/src/driver/amdxdna/aie2_ctx.c
++++ b/src/driver/amdxdna/aie2_ctx.c
+@@ -118,7 +118,7 @@ out:
+ 	 * Even above commands might failed, we still needs to restart DRM
+ 	 * scheduler, to signal those commands in the pending list.
+ 	 */
+-	drm_sched_start(&hwctx->priv->sched, true);
++	drm_sched_start(&hwctx->priv->sched);
+ 	XDNA_DBG(xdna, "%s restarted, ret %d", hwctx->name, ret);
+ 	return ret;
+ }
+-- 
+2.46.0
+
