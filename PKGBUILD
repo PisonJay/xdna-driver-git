@@ -2,7 +2,7 @@
 
 pkgrel=1
 arch=(x86_64)
-pkgver=r310.90e31a4
+pkgver=r310.8d79b38
 url='https://github.com/amd/xdna-driver'
 license=(Apache)
 
@@ -49,6 +49,11 @@ options=(!debug !strip)
 source=(
     xdna-driver::git+https://github.com/amd/xdna-driver
     xrt::git+https://github.com/Xilinx/XRT
+    dma_ip_drivers::git+https://github.com/Xilinx/dma_ip_drivers.git
+    elf::git+https://github.com/serge1/ELFIO.git
+    gsl::git+https://github.com/microsoft/GSL.git
+    aiebu::git+https://github.com/Xilinx/aiebu.git
+    aie-rt::git+https://github.com/Xilinx/aie-rt.git#branch=release/main_aig
     1502_00.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/1502_00/npu.sbin.1.4.2.329
     17f0_00.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/17f0_00/npu.sbin.0.7.22.185
     17f0_10.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/17f0_10/npu.sbin.0.7.35.35
@@ -58,6 +63,11 @@ source=(
     0002-make-xdna-driver-compile-on-linux-amd-drm-next.patch
 )
 sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
             'SKIP'
             'cdebef73283a4ca8e10d65bb0b18da46dd3b71a6e17f57216732c9e1761040b6'
             'e87bd717207fa940c502f813e360c712c6d87a53da5358fc1c31efca736ed33a'
@@ -72,9 +82,23 @@ prepare() {
     git config submodule.xrt.url $srcdir/xrt
     git -c protocol.file.allow=always submodule update
     cat ../*.patch | git am
-    cd $srcdir/xdna-driver/xrt
+    
+    pushd $srcdir/xdna-driver/xrt
     git checkout master
-    cd ..
+    git submodule init
+    git config submodule.src/runtime_src/core/pcie/driver/linux/xocl/lib/libqdma.url $srcdir/dma_ip_drivers
+    git config submodule.src/runtime_src/core/common/elf.url $srcdir/elf
+    git config submodule.src/runtime_src/core/common/gs.url $srcdir/gsl
+    git config submodule.src/runtime_src/core/common/aiebu.url $srcdir/aiebu
+    git -c protocol.file.allow=always submodule update
+
+    cd src/runtime_src/core/common/aiebu
+    git submodule init
+    git config submodule.lib/aie-rt.url $srcdir/aie-rt
+    git config submodule.src/cpp/ELFIO.url $srcdir/elf
+    git -c protocol.file.allow=always submodule update
+
+    popd
     git commit -am "Bump xrt submodule version"
 }
 build() {

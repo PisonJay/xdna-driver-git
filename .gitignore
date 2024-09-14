@@ -1,0 +1,12 @@
+*.sbin
+pkg/
+src/
+*.pkg.tar.zst
+
+xdna-driver/
+xrt/
+dma_ip_drivers/
+elf/
+gsl/
+aiebu/
+aie-rt/
