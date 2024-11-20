@@ -1,8 +1,9 @@
 # Maintainer: Pison Jay <PisonJay@outlook.com>
+# Based on xrt-git PKGBUILD by Gökçe Aydos <aur2024@aydos.de>
 
 pkgrel=1
 arch=(x86_64)
-pkgver=r310.8d79b38
+pkgver=r351.0d43441
 url='https://github.com/amd/xdna-driver'
 license=(Apache)
 
@@ -54,13 +55,14 @@ source=(
     gsl::git+https://github.com/microsoft/GSL.git
     aiebu::git+https://github.com/Xilinx/aiebu.git
     aie-rt::git+https://github.com/Xilinx/aie-rt.git#branch=release/main_aig
-    1502_00.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/1502_00/npu.sbin.1.4.2.329
+    1502_00.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/1502_00/npu.sbin.1.5.2.378
     17f0_00.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/17f0_00/npu.sbin.0.7.22.185
-    17f0_10.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/17f0_10/npu.sbin.0.7.35.35
-    17f0_11.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/17f0_11/npu.sbin.0.7.35.139
+    17f0_10.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/17f0_10/npu.sbin.1.0.0.61
+    17f0_11.sbin::https://gitlab.com/kernel-firmware/drm-firmware/-/raw/amd-ipu-staging/amdnpu/17f0_11/npu.sbin.1.0.0.164
     99-amdxdna.rules
-    0001-Revert-bitfield-for-__counted_by-attribute.patch
-    0002-make-xdna-driver-compile-on-linux-amd-drm-next.patch
+#    0001-Revert-bitfield-for-__counted_by-attribute.patch
+#    0002-make-xdna-driver-compile-on-linux-amd-drm-next.patch
+#    0003-updated-dpu-validate-bin.patch
 )
 sha256sums=('SKIP'
             'SKIP'
@@ -69,19 +71,18 @@ sha256sums=('SKIP'
             'SKIP'
             'SKIP'
             'SKIP'
-            'cdebef73283a4ca8e10d65bb0b18da46dd3b71a6e17f57216732c9e1761040b6'
+            '6b9a3a645818abad79bf5d670cb457718343b5fa553bdc7a173c71307913bcd9'
             'e87bd717207fa940c502f813e360c712c6d87a53da5358fc1c31efca736ed33a'
-            '5c19e5e77db4d8069ecfbbff81c66bff60777b77ddc555c17c5b15c673313816'
-            '00d6dac7546ccc8d5b52a4679a11ff5a02f2df41639cd9ab2cad6a643726b45a'
+            '46dbfa0c0f60748083297cb36a53bb598cde22ac315b1a033905a07f231d10a1'
+            'c0c11be5c759648a4b6a080118f53a5eca75dca1633d15ec3b71fe7455f24e83'
             'ebf17c2e000c52fb31b1abfba1ce41a107dc8d277925e8644cddac2e3c41b1d9'
-            '50431cf83e8caf5601b337f6af067b3ab0e700354db99c7b97d6c3124fe08b27'
-            'c58ec8a07ca436ffa9857165a558b720f6a1ba156438a2c3a3d0b9395736d0ca')
+            )
 prepare() {
     cd $srcdir/xdna-driver
     git submodule init
     git config submodule.xrt.url $srcdir/xrt
     git -c protocol.file.allow=always submodule update
-    cat ../*.patch | git am
+    cat ../*.patch | git am --whitespace=fix --reject 
     
     pushd $srcdir/xdna-driver/xrt
     git checkout master
@@ -147,7 +148,6 @@ package_xdna-driver-git() {
     url='https://github.com/amd/xdna-driver'
     cd $srcdir/xdna-driver/clean-build
     DESTDIR=$pkgdir make -j$(nproc) install
-    rm -rf $pkgdir/bins
 
     # install firmware
     for devid in ${devids[@]}; do
@@ -161,6 +161,7 @@ package_xdna-driver-git() {
     DKMS_DRV_DIR_NAME=${DKMS_PKG_NAME}-${DKMS_PKG_VER}
     DKMS_DRV_DIR=$pkgdir/usr/src/${DKMS_DRV_DIR_NAME}
     install -d ${DKMS_DRV_DIR}
+    cp -r $srcdir/xdna-driver/tools/bins ${DRV_SRC_DIR}
     install -Dm644 $DRV_SRC_DIR/dkms.conf $DKMS_DRV_DIR/dkms.conf
     pushd $DKMS_DRV_DIR
     tar -xf $DRV_SRC_DIR/amdxdna.tar.gz
